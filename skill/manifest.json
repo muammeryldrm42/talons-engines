@@ -1,0 +1,427 @@
+{
+  "name": "talons-regime-engine",
+  "version": "0.2.0",
+  "title": "Talons Regime Engine",
+  "summary": "Regime-adaptive crypto strategy skill. Reads the market regime from CoinMarketCap signals, then ranks assets with regime-dependent weights and explicit entry/exit rules.",
+  "when_to_use": "Invoke when a user or agent needs a directional, position-sized crypto strategy decision (allocation or full-market scan) grounded in market-wide context — not a single-chart TA call. Covers momentum, sentiment-divergence, and derivatives-aware regime detection in one skill.",
+  "category": "trading-strategy",
+  "deliverable": "backtestable-strategy-specification",
+  "skills": [
+    {
+      "id": "momentum",
+      "name": "Momentum (RSI · MACD · Fear & Greed)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "trend-alignment",
+      "name": "Trend Alignment (multi-timeframe)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "mean-reversion",
+      "name": "Mean Reversion (RSI extremes)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "momentum-cross",
+      "name": "Momentum Cross (7d vs 30d)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "volume-turnover",
+      "name": "Volume / Turnover",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "dip-buyer",
+      "name": "Dip Buyer (drawdown recovery)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "volatility-breakout",
+      "name": "Volatility Breakout",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "regime-detection",
+      "name": "Regime Detection (derivatives-aware)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "fear-greed-contrarian",
+      "name": "Fear & Greed Contrarian",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "sentiment-divergence",
+      "name": "Sentiment Divergence",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "breadth-rotation",
+      "name": "Breadth Rotation",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "dominance-rotation",
+      "name": "Dominance Rotation (BTC ↔ ETH)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "eth-btc-strength",
+      "name": "ETH / BTC Relative Strength",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "dry-powder",
+      "name": "Dry Powder (stablecoin supply)",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "altseason-gate",
+      "name": "Altcoin Season Gate",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "momentum-acceleration",
+      "name": "Momentum Acceleration",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "trend-quality",
+      "name": "Trend Quality",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "reversal-radar",
+      "name": "Capitulation / Euphoria Reversal",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "flight-to-majors",
+      "name": "Flight to Majors",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "volume-confirmed-trend",
+      "name": "Volume-Confirmed Trend",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "liquidity-health",
+      "name": "Liquidity Health",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "drawdown-guard",
+      "name": "Drawdown Guard",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "capitulation-volume",
+      "name": "Capitulation Volume",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "id": "momentum-divergence",
+      "name": "Momentum Divergence",
+      "targets": [
+        "BTC",
+        "ETH"
+      ]
+    }
+  ],
+  "data_dependencies": {
+    "coinmarketcap": [
+      "/v3/fear-and-greed/latest",
+      "/v3/fear-and-greed/historical",
+      "/v1/global-metrics/quotes/latest",
+      "/v1/global-metrics/quotes/historical",
+      "/v1/cryptocurrency/listings/latest",
+      "/v2/cryptocurrency/ohlcv/historical",
+      "/v2/cryptocurrency/quotes/latest",
+      "agent-hub:get_global_metrics_latest",
+      "agent-hub:get_global_crypto_derivatives_metrics"
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "required": [
+      "asOf",
+      "market",
+      "coins"
+    ],
+    "properties": {
+      "asOf": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "market": {
+        "type": "object",
+        "required": [
+          "fearGreed",
+          "altseasonIndex",
+          "btcDominance",
+          "btcDominanceTrend",
+          "btcReturn7d",
+          "btcReturn30d"
+        ],
+        "properties": {
+          "fearGreed": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "altseasonIndex": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "btcDominance": {
+            "type": "number"
+          },
+          "btcDominanceTrend": {
+            "type": "number",
+            "description": "dominance slope over the lookback window (pct points)"
+          },
+          "btcReturn7d": {
+            "type": "number"
+          },
+          "btcReturn30d": {
+            "type": "number"
+          },
+          "etfNetFlowZ": {
+            "type": "number",
+            "description": "optional: z-score of 5d net ETF flow (live)"
+          },
+          "aggFundingRate": {
+            "type": "number",
+            "description": "optional: aggregate perp funding per 8h (live, derivatives)"
+          },
+          "openInterestChange": {
+            "type": "number",
+            "description": "optional: 24h change in total OI (live, derivatives)"
+          },
+          "liquidationCascade": {
+            "type": "boolean"
+          },
+          "riskFlag": {
+            "type": "boolean"
+          }
+        }
+      },
+      "coins": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "symbol",
+            "name",
+            "marketCap",
+            "volume24h",
+            "pctChange24h",
+            "pctChange7d",
+            "pctChange30d",
+            "pctChange90d"
+          ],
+          "properties": {
+            "symbol": {
+              "type": "string"
+            },
+            "rsi": {
+              "type": "number",
+              "description": "optional: RSI(14) from OHLCV"
+            },
+            "macdHistogram": {
+              "type": "number",
+              "description": "optional: MACD histogram from OHLCV"
+            },
+            "fundingRate": {
+              "type": "number"
+            },
+            "exchangeNetflow": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "prevRegime": {
+        "type": "string"
+      },
+      "options": {
+        "type": "object",
+        "properties": {
+          "fullScan": {
+            "type": "boolean",
+            "description": "scan the whole liquid market"
+          },
+          "topN": {
+            "type": "number"
+          },
+          "confidenceScaling": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "asOf": {
+        "type": "string"
+      },
+      "market": {
+        "type": "object",
+        "description": "regime, confidence, reasons, transition, tilts, risk flags"
+      },
+      "rankedCoins": {
+        "type": "array",
+        "description": "ranked directional signals with target weights + per-coin rationale"
+      },
+      "totalTargetExposure": {
+        "type": "number"
+      },
+      "rationale": {
+        "type": "string",
+        "description": "natural-language explanation of the decision"
+      }
+    }
+  },
+  "entrypoint": "lib/skill.ts#evaluate",
+  "endpoints": {
+    "live": "GET /api/regime",
+    "skills": "GET /api/skills",
+    "backtest": "GET /api/backtest",
+    "prices": "GET /api/prices",
+    "sectors": "GET /api/sectors",
+    "agent_hub": "GET /api/agenthub",
+    "market_map": "GET /api/marketmap",
+    "agent_hub_engine": "GET /api/agenthub-engine",
+    "technical_analysis": "GET /api/ta",
+    "skill": "GET /api/skill",
+    "skill_describe": "GET /api/skill/describe",
+    "x402_skill": "GET /api/x402/skill",
+    "monte_carlo": "GET /api/montecarlo",
+    "cmc100": "GET /api/cmc100",
+    "mcp": "POST /api/mcp",
+    "skill_backtest": "GET /api/skill-backtest",
+    "narratives": "GET /api/narratives",
+    "macro": "GET /api/macro",
+    "news": "GET /api/news",
+    "lookup": "GET /api/lookup",
+    "consensus": "GET /api/consensus"
+  },
+  "data_source_primary": "CoinMarketCap AI Agent Hub (MCP) at https://mcp.coinmarketcap.com/mcp, with CMC REST + mock fallback; keyless x402 supported",
+  "skillsMarketplace": {
+    "ready": true,
+    "discover": "GET /api/skill/describe",
+    "invoke": "GET /api/skill",
+    "auth": "none",
+    "agentReadyOutput": true,
+    "outputShape": "decision framework — regime + riskPosture + marketState + BTC/ETH BUY/SELL/HOLD + confirmingSignals + invalidation + netExposure + rationale",
+    "formats": [
+      "json",
+      "md",
+      "yaml"
+    ],
+    "decisionFramework": [
+      "riskPosture",
+      "marketState",
+      "confirmingSignals",
+      "invalidation",
+      "dataFreshness"
+    ]
+  },
+  "x402": {
+    "endpoint": "GET /api/x402/skill",
+    "version": 1,
+    "network": "base",
+    "asset": "USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)",
+    "pricePerCall": "0.01 USDC (example)",
+    "note": "Reference x402 handshake; settlement verification via facilitator required in production."
+  },
+  "mcpServer": {
+    "transport": "streamable-http",
+    "endpoint": "/api/mcp",
+    "protocol": "2024-11-05",
+    "tools": [
+      "get_strategy_decision",
+      "describe_strategy",
+      "scan_altcoins",
+      "get_narrative_rotation",
+      "get_macro_events",
+      "coin_lookup",
+      "skill_consensus"
+    ]
+  }
+}
